@@ -5,16 +5,22 @@ pkgs = $(shell ./novendor.sh)
 cmd = goss
 GO111MODULE=on
 GO_FILES = $(shell git ls-files -- '*.go' ':!:*vendor*_test.go')
+MACHINE := $(shell uname -m)
+OS = $(shell uname -s |tr '[[:upper:]]' '[[:lower:]]')
+ALPHA_OS := darwin windows
 
-.PHONY: all build install test release bench fmt lint vet test-int-all gen centos7 wheezy trusty alpine3 arch test-int32 centos7-32 wheezy-32 trusty-32 alpine3-32 arch-32
+.PHONY: all build install test release bench fmt lint vet test-int-all gen centos7 wheezy trusty alpine3 arch test-int32 centos7-32 wheezy-32 trusty-32 alpine3-32 arch-32 $(ALPHA_OS)
 
 all: test-short-all test-int-all dgoss-sha256
 
 test-short-all: fmt lint vet test
 
-install: release/goss-linux-amd64
+$(ALPHA_OS):
+	$(eval OS = alpha-$(OS))
+
+install: $(OS) release/goss-$(OS)-$(MACHINE)
 	$(info INFO: Starting build $@)
-	cp release/$(cmd)-linux-amd64 $(GOPATH)/bin/goss
+	cp release/$(cmd)-$(OS)-amd64 $(GOPATH)/bin/goss
 
 test:
 	$(info INFO: Starting build $@)
